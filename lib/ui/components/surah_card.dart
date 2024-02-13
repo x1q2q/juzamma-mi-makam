@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import '../../core/styles.dart';
 import '../../core/ui_helper.dart';
-import 'svg.dart';
 
 class SurahCard extends StatelessWidget {
+  final int index;
   final IconData? icon;
   final String tooltip;
   final String namaSurah;
   final String descSurah;
+  final void Function()? onTap;
+  final void Function()? onPressBtnIcon;
   const SurahCard(
       {Key? key,
+      required this.index,
       required this.icon,
       required this.namaSurah,
       required this.descSurah,
-      required this.tooltip})
+      required this.tooltip,
+      required this.onTap,
+      this.onPressBtnIcon})
       : super(key: key);
 
   @override
@@ -26,8 +31,8 @@ class SurahCard extends StatelessWidget {
                 color: lightgreenv2,
                 borderRadius: BorderRadius.circular(6),
                 child: InkWell(
-                    splashColor: Colors.white,
-                    onTap: () {},
+                    splashColor: Colors.amber[400],
+                    onTap: this.onTap,
                     borderRadius: BorderRadius.circular(6),
                     child: Container(
                       height: 80,
@@ -39,14 +44,14 @@ class SurahCard extends StatelessWidget {
                           children: <Widget>[
                             Container(
                               width: 70,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                   color: darkgreenv1,
                                   borderRadius: BorderRadius.only(
                                       topLeft: (Radius.circular(6)),
                                       bottomLeft: (Radius.circular(6)))),
                               child: Center(
                                   child: Text(
-                                '(1)',
+                                '(${index.toString()})',
                                 style: Styles.wLarge25,
                               )),
                             ),
@@ -66,7 +71,7 @@ class SurahCard extends StatelessWidget {
                             IconButton(
                               tooltip: this.tooltip,
                               padding: EdgeInsets.all(10),
-                              onPressed: () {},
+                              onPressed: onPressBtnIcon,
                               icon: Icon(this.icon),
                               color: darkgreenv1,
                               iconSize: 50,

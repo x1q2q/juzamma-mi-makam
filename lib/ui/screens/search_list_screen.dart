@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:juzamma/ui/components/surah_card.dart';
+import '../components/surah_card.dart';
 import '../components/label_card.dart';
+import '../components/def_appbar.dart';
 import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
 
@@ -18,37 +19,33 @@ class _SearchListScreenState extends State<SearchListScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 75,
-        backgroundColor: darkgreenv2,
-        elevation: 0.3,
-        title: TextField(
-          autofocus: true,
-          controller: _searchController,
-          style: Styles.gBold17,
-          cursorColor: darkgreenv1,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            fillColor: Colors.white,
-            filled: true,
-            hintText: 'Cari nama surah ...',
-            hintStyle: Styles.gBold17,
+      appBar: DefAppBar(
+          centered: true,
+          title: TextField(
+            autofocus: true,
+            controller: _searchController,
+            style: Styles.gBold17,
+            cursorColor: darkgreenv1,
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              fillColor: Colors.white,
+              filled: true,
+              hintText: 'Cari nama surah ...',
+              hintStyle: Styles.gBold17,
+            ),
+            onChanged: (value) {},
           ),
-          onChanged: (value) {},
-        ),
-        centerTitle: true,
-        leadingWidth: 70,
-        leading: GestureDetector(
-          child: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
-            size: 35,
-          ),
-          onTap: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
+          leadingWidth: 70,
+          leading: GestureDetector(
+            child: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+              size: 35,
+            ),
+            onTap: () {
+              Navigator.pop(context);
+            },
+          )),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -67,10 +64,12 @@ class _SearchListScreenState extends State<SearchListScreen> {
                             physics: const NeverScrollableScrollPhysics(),
                             itemBuilder: (_, index) {
                               return SurahCard(
+                                index: index + 1,
                                 icon: Icons.close,
                                 namaSurah: 'Surah Al-Falaq',
                                 descSurah: 'Surah ini terdiri ata 25 ayat.',
                                 tooltip: 'Hapus surah dari riwayat pencarian',
+                                onTap: () {},
                               );
                             })),
                   ]))),

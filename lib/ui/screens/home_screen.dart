@@ -4,9 +4,11 @@ import '../components/label_card.dart';
 import '../components/fav_card.dart';
 import '../../core/ui_helper.dart';
 import 'search_list_screen.dart';
+import '../../providers/services/database_services.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool? isVisibleAudioTabs;
+  const HomeScreen({super.key, this.isVisibleAudioTabs});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -68,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     Text(
                                       'Cari surah di sini',
-                                      style: Styles.gBold18,
+                                      style: Styles.lgBold18,
                                     )
                                   ],
                                 )))),
@@ -123,7 +125,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: Styles.gLarge25,
                             ),
                             IconButton(
-                              onPressed: () {},
+                              onPressed: () async {
+                                // DatabaseService db = DatabaseService();
+                                // await db.addBookmark();
+                              },
                               icon: Icon(Icons.play_circle_fill),
                               color: darkgreenv2,
                               iconSize: 50,
