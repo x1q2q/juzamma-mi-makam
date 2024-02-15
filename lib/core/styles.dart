@@ -132,6 +132,16 @@ class Styles {
     behavior: SnackBarBehavior.floating,
   );
 
+  static const snackBarRemRecentS = SnackBar(
+    content:
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+      Icon(Icons.remove_circle_rounded, color: Colors.white),
+      Text('Riwayat pencarian berhasil dihapus', style: Styles.wRegular14)
+    ]),
+    backgroundColor: greyv2,
+    behavior: SnackBarBehavior.floating,
+  );
+
   static const snackBarAddBookmark = SnackBar(
     content:
         Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[

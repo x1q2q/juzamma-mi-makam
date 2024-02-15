@@ -38,9 +38,10 @@ class DatabaseService {
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(
         'CREATE TABLE temporary_surah (id INTEGER PRIMARY KEY AUTOINCREMENT, suraId INTEGER, tipe TEXT, surahName TEXT, totalAyat TEXT)');
+    // tipe  {'bookmark','favorit','recent_search','recent_play'}
   }
 
-  Future<void> addBookmark(Surah? surah) async {
+  Future<void> addTemp(Surah? surah) async {
     Database db = await database;
     await db.rawInsert(
         'INSERT INTO temporary_surah(id, suraId, tipe, surahName, totalAyat) VALUES (?, ?, ?, ?, ?)',
@@ -60,6 +61,42 @@ class DatabaseService {
 
   Future<List> queryDetail(String table, String? column, String? value) async {
     Database db = await database;
-    return await db.rawQuery('SELECT * FROM "$table" WHERE ${column}="$value"');
+    return await db.rawQuery(
+        'SELECT * FROM "$table" WHERE ${column}="$value" ORDER BY id desc');
+  }
+
+  Future<List> queryDetailAnd(String table, String? column1, String? value1,
+      String? column2, String? value2) async {
+    Database db = await database;
+    return await db.rawQuery(
+        'SELECT * FROM "$table" WHERE ${column1}="$value1" AND ${column2}="$value2" ORDER BY id desc');
+  }
+
+  Future<bool> isStored(String table, String? column1, String? value1,
+      String? column2, String? value2) async {
+    List data;
+    data = await queryDetailAnd(table, column1, value1, column2, value2);
+    return (data.isEmpty) ? false : true;
+  }
+
+  Future<void> removeBySuraId(String? suraId, String? tipe) async {
+    Database db = await database;
+    await db.rawDelete(
+        'DELETE FROM temporary_surah WHERE suraId="$suraId" AND tipe="$tipe"');
+  }
+
+  Future<List> cariSurah(String table, String? keywords) async {
+    Database db = await database;
+    return await db.rawQuery(
+        'SELECT * FROM "$table" WHERE surahName LIKE "%$keywords%" GROUP BY suraId');
+  }
+
+  Future<void> addAfterSearch(Surah? surah) async {
+    List checkQ;
+    checkQ = await queryDetailAnd(
+        'temporary_surah', 'suraId', surah!.suraId, 'tipe', 'recent_search');
+    if (checkQ.isEmpty) {
+      await addTemp(surah);
+    }
   }
 }

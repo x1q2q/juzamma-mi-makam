@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import '../../core/styles.dart';
 import '../../core/ui_helper.dart';
@@ -11,20 +13,27 @@ import '../../providers/services/database_services.dart';
 import '../../providers/models/surah.dart';
 
 class DetailSurahScreen extends StatefulWidget {
-  final String? suraId;
+  final int suraId;
   final String? surahName;
   final String? totalAyat;
-  const DetailSurahScreen(
-      {super.key, this.suraId, this.surahName, this.totalAyat});
+  const DetailSurahScreen({
+    super.key,
+    required this.suraId,
+    this.surahName,
+    this.totalAyat,
+  });
 
   @override
   State<DetailSurahScreen> createState() => _DetailSurahScreenState();
 }
 
 class _DetailSurahScreenState extends State<DetailSurahScreen> {
+  DatabaseService dbServ = DatabaseService();
   bool _isVisibleAudioTabs = false;
   bool _isFavoriteSurah = false;
   bool _isBookmarkedSurah = false;
+  bool _isStoredBookmark = false;
+  bool _isStoredFavorit = false;
 
   bool _isLoading = true;
   bool _isError = false;
@@ -41,12 +50,20 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
   }
 
   List? allAyat;
+  List? dataInRaw;
   _getData() async {
-    DatabaseService dbServ = DatabaseService();
     _isLoading = true;
-    allAyat = await dbServ.queryDetail('quran_id', "suraId", widget.suraId);
+    _isStoredBookmark = await dbServ.isStored('temporary_surah', 'suraId',
+        widget.suraId.toString(), 'tipe', 'bookmark');
+    _isStoredFavorit = await dbServ.isStored('temporary_surah', 'suraId',
+        widget.suraId.toString(), 'tipe', 'favorit');
+    allAyat = await dbServ.queryDetail(
+        'quran_id', "suraId", widget.suraId.toString());
+
     setState(() {
       _isLoading = false;
+      _isBookmarkedSurah = _isStoredBookmark;
+      _isFavoriteSurah = _isStoredFavorit;
     });
   }
 
@@ -71,10 +88,29 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
               actBtn: <Widget>[
                 SVGBtnIcon(
                     onTap: () async {
-                      final snackBarFav = _isFavoriteSurah
-                          ? Styles.snackBarRemFavorit
-                          : Styles.snackBarAddFavorit;
-                      ScaffoldMessenger.of(context).showSnackBar(snackBarFav);
+                      if (_isFavoriteSurah) {
+                        await dbServ.removeBySuraId(
+                            widget.suraId.toString(), "favorit");
+                        await ScaffoldMessenger.of(context)
+                            .showSnackBar(Styles.snackBarRemFavorit);
+                      } else {
+                        Map<String, dynamic> dt = {
+                          "suraId": widget.suraId.toString(),
+                          "surahName": widget.surahName,
+                          "totalAyat": widget.totalAyat,
+                          "tipe": "favorit"
+                        };
+                        Surah surahData = Surah.fromMap(dt);
+                        List lastFac = await dbServ.queryDetail(
+                            'temporary_surah', 'tipe', 'favorit');
+                        if (lastFac.length > 2) {
+                          await dbServ.removeBySuraId(
+                              lastFac[0]["suraId"].toString(), 'favorit');
+                        }
+                        await dbServ.addTemp(surahData);
+                        await ScaffoldMessenger.of(context)
+                            .showSnackBar(Styles.snackBarAddFavorit);
+                      }
 
                       setState(() {
                         _isFavoriteSurah = !_isFavoriteSurah;
@@ -87,19 +123,24 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
                     splashColor: darkgreenv1),
                 SVGBtnIcon(
                     onTap: () async {
-                      Map<String, dynamic> dt = {
-                        "suraId": widget.suraId,
-                        "surahName": widget.surahName,
-                        "totalAyat": widget.totalAyat,
-                        "tipe": "bookmark"
-                      };
-                      Surah surahData = Surah.fromMap(dt);
-                      DatabaseService dbServ = DatabaseService();
-                      await dbServ.addBookmark(surahData);
-                      final snackBarBook = _isBookmarkedSurah
-                          ? Styles.snackBarRemBookmark
-                          : Styles.snackBarAddBookmark;
-                      ScaffoldMessenger.of(context).showSnackBar(snackBarBook);
+                      if (_isBookmarkedSurah) {
+                        await dbServ.removeBySuraId(
+                            widget.suraId.toString(), "bookmark");
+                        await ScaffoldMessenger.of(context)
+                            .showSnackBar(Styles.snackBarRemBookmark);
+                      } else {
+                        Map<String, dynamic> dt = {
+                          "suraId": widget.suraId.toString(),
+                          "surahName": widget.surahName,
+                          "totalAyat": widget.totalAyat,
+                          "tipe": "bookmark"
+                        };
+                        Surah surahData = Surah.fromMap(dt);
+                        await dbServ.addTemp(surahData);
+                        await ScaffoldMessenger.of(context)
+                            .showSnackBar(Styles.snackBarAddBookmark);
+                      }
+
                       setState(() {
                         _isBookmarkedSurah = !_isBookmarkedSurah;
                       });

@@ -61,7 +61,7 @@ class _TabScreenState extends State<TabScreen> {
                             height: 35),
                         icon: Container(
                             child: SVG.bookmarkIcon, width: 35, height: 35),
-                        label: 'Disimpan',
+                        label: 'Bookmark',
                         tooltip: 'Daftar Surah Disimpan'),
                   ],
                   currentIndex: _selectedIndex,

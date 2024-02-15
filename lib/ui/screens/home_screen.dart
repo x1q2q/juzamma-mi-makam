@@ -5,16 +5,39 @@ import '../components/fav_card.dart';
 import '../../core/ui_helper.dart';
 import 'search_list_screen.dart';
 import '../../providers/services/database_services.dart';
+import 'detail_surah_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final bool? isVisibleAudioTabs;
-  const HomeScreen({super.key, this.isVisibleAudioTabs});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  DatabaseService dbServ = DatabaseService();
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _getData();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  List? surahFav;
+  _getData() async {
+    _isLoading = true;
+    surahFav = await dbServ.queryDetail('temporary_surah', 'tipe', 'favorit');
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var screenSizes = MediaQuery.of(context).size;
@@ -99,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     verticalSpaceXSmall,
                     Container(
                       decoration: const BoxDecoration(
-                          color: Colors.white,
+                          color: lightgreenv3,
                           borderRadius: BorderRadius.all(Radius.circular(20))),
                       height: 100,
                       padding: EdgeInsets.only(right: 10),
@@ -125,10 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: Styles.gLarge25,
                             ),
                             IconButton(
-                              onPressed: () async {
-                                // DatabaseService db = DatabaseService();
-                                // await db.addBookmark();
-                              },
+                              onPressed: () async {},
                               icon: Icon(Icons.play_circle_fill),
                               color: darkgreenv2,
                               iconSize: 50,
@@ -137,15 +157,41 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     verticalSpaceMedium,
                     LabelCard(
-                      text: 'Favorit Surah',
+                      text: 'Surah Favorit',
                     ),
                     verticalSpaceXSmall,
-                    GridView.count(
-                        crossAxisSpacing: 5,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        crossAxisCount: 3,
-                        children: <Widget>[FavCard(), FavCard(), FavCard()])
+                    _isLoading
+                        ? Center(
+                            child:
+                                CircularProgressIndicator(color: darkgreenv1))
+                        : GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: 150,
+                                    crossAxisSpacing: 5,
+                                    mainAxisSpacing: 5),
+                            itemCount: surahFav?.length,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemBuilder: (BuildContext ctx, index) {
+                              return FavCard(
+                                  surahName: surahFav?[index]["surahName"],
+                                  onTap: () async {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                DetailSurahScreen(
+                                                    suraId:
+                                                        surahFav![index]
+                                                                ["suraId"],
+                                                    surahName:
+                                                        surahFav?[index]
+                                                            ["surahName"],
+                                                    totalAyat: surahFav?[index]
+                                                        ["totalAyat"])));
+                                  });
+                            }),
                   ])),
         ]),
       ]),

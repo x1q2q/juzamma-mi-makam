@@ -15,8 +15,8 @@ class Skeleton {
           itemBuilder: (_, index) {
             return Container(
               width: double.infinity,
-              height: 80,
-              margin: const EdgeInsets.symmetric(vertical: 10),
+              height: 70,
+              margin: const EdgeInsets.symmetric(vertical: 5),
               decoration: ShapeDecoration(
                   color: Colors.grey[500]!,
                   shape: const RoundedRectangleBorder(

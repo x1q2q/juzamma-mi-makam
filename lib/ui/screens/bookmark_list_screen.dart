@@ -6,6 +6,7 @@ import '../../core/styles.dart';
 import '../components/def_appbar.dart';
 import '../../providers/services/database_services.dart';
 import '../components/skeleton.dart';
+import 'detail_surah_screen.dart';
 
 class BookmarkListScreen extends StatefulWidget {
   const BookmarkListScreen({super.key});
@@ -48,7 +49,7 @@ class _BookmarkListScreenState extends State<BookmarkListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const DefAppBar(
-          title: Text("Disimpan", style: Styles.titleBarStyle), centered: true),
+          title: Text("Bookmark", style: Styles.titleBarStyle), centered: true),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -69,6 +70,7 @@ class _BookmarkListScreenState extends State<BookmarkListScreen> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemBuilder: (_, index) {
                                   return SurahCard(
+                                    bgColor: Colors.amber[100],
                                     index: index + 1,
                                     icon: Icons.bookmark_remove_outlined,
                                     namaSurah:
@@ -76,7 +78,22 @@ class _BookmarkListScreenState extends State<BookmarkListScreen> {
                                     descSurah:
                                         'Surah ini terdiri atas ${surahBookmark?[index]["totalAyat"]} ayat.',
                                     tooltip: 'Hapus surah dari daftar simpan',
-                                    onTap: () {},
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  DetailSurahScreen(
+                                                      suraId:
+                                                          surahBookmark![index]
+                                                              ["suraId"],
+                                                      surahName:
+                                                          surahBookmark?[index]
+                                                              ["surahName"],
+                                                      totalAyat:
+                                                          surahBookmark?[index]
+                                                              ["totalAyat"])));
+                                    },
                                     onPressBtnIcon: () async {
                                       await _deleteData(
                                           surahBookmark?[index]["id"]);

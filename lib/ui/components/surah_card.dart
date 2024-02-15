@@ -10,6 +10,7 @@ class SurahCard extends StatelessWidget {
   final String descSurah;
   final void Function()? onTap;
   final void Function()? onPressBtnIcon;
+  final Color? bgColor;
   const SurahCard(
       {Key? key,
       required this.index,
@@ -18,7 +19,8 @@ class SurahCard extends StatelessWidget {
       required this.descSurah,
       required this.tooltip,
       required this.onTap,
-      this.onPressBtnIcon})
+      this.onPressBtnIcon,
+      this.bgColor})
       : super(key: key);
 
   @override
@@ -28,14 +30,14 @@ class SurahCard extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 10),
             child: Material(
                 elevation: 1.0,
-                color: lightgreenv2,
+                color: bgColor,
                 borderRadius: BorderRadius.circular(6),
                 child: InkWell(
                     splashColor: Colors.amber[400],
                     onTap: this.onTap,
                     borderRadius: BorderRadius.circular(6),
                     child: Container(
-                      height: 80,
+                      height: 70,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(6),
                       ),

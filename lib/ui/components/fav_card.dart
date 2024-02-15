@@ -4,17 +4,21 @@ import '../../core/ui_helper.dart';
 import 'svg.dart';
 
 class FavCard extends StatelessWidget {
-  const FavCard({Key? key}) : super(key: key);
+  final String surahName;
+  final Function()? onTap;
+  const FavCard({Key? key, required this.surahName, required this.onTap})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SizedBox.fromSize(
         child: Material(
-            color: Colors.white,
+            color: lightgreenv3,
             borderRadius: BorderRadius.circular(15),
+            elevation: 0.1,
             child: InkWell(
                 splashColor: lightgreenv1,
-                onTap: () {},
+                onTap: onTap,
                 borderRadius: BorderRadius.circular(15),
                 child: Container(
                     decoration: BoxDecoration(
@@ -41,7 +45,7 @@ class FavCard extends StatelessWidget {
                           padding: EdgeInsets.all(6),
                           child: Center(
                               child: Text(
-                            'Al-insyiroh',
+                            surahName,
                             style: Styles.wRegular14,
                           )),
                         )
