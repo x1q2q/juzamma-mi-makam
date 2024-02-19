@@ -38,7 +38,7 @@ class Styles {
       fontWeight: FontWeight.w900,
       color: Colors.white,
       letterSpacing: 0,
-      fontSize: 30);
+      fontSize: 25);
 
   static const wLarge25 = TextStyle(
       fontFamily: 'Lato',

@@ -6,6 +6,7 @@ import '../../core/styles.dart';
 import '../components/def_appbar.dart';
 import '../../providers/services/database_services.dart';
 import '../components/skeleton.dart';
+import '../components/empty_box.dart';
 import 'detail_surah_screen.dart';
 
 class BookmarkListScreen extends StatefulWidget {
@@ -63,49 +64,56 @@ class _BookmarkListScreenState extends State<BookmarkListScreen> {
                     verticalSpaceSmall,
                     _isLoading
                         ? Skeleton.shimmerListSurah
-                        : SizedBox(
-                            child: ListView.builder(
-                                itemCount: surahBookmark?.length,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemBuilder: (_, index) {
-                                  return SurahCard(
-                                    bgColor: Colors.amber[100],
-                                    index: index + 1,
-                                    icon: Icons.bookmark_remove_outlined,
-                                    namaSurah:
-                                        'Surah ${surahBookmark?[index]["surahName"]}',
-                                    descSurah:
-                                        'Surah ini terdiri atas ${surahBookmark?[index]["totalAyat"]} ayat.',
-                                    tooltip: 'Hapus surah dari daftar simpan',
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  DetailSurahScreen(
-                                                      suraId:
-                                                          surahBookmark![index]
-                                                              ["suraId"],
-                                                      surahName:
-                                                          surahBookmark?[index]
-                                                              ["surahName"],
-                                                      totalAyat:
-                                                          surahBookmark?[index]
-                                                              ["totalAyat"])));
-                                    },
-                                    onPressBtnIcon: () async {
-                                      await _deleteData(
-                                          surahBookmark?[index]["id"]);
-                                      setState(() {
-                                        _getData();
-                                      });
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                              Styles.snackBarRemBookmark);
-                                    },
-                                  );
-                                })),
+                        : surahBookmark!.isEmpty
+                            ? const EmptyBox()
+                            : SizedBox(
+                                child: ListView.builder(
+                                    itemCount: surahBookmark?.length,
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemBuilder: (_, index) {
+                                      return SurahCard(
+                                        bgColor: Colors.amber[100],
+                                        index: index + 1,
+                                        icon: Icons.bookmark_remove_outlined,
+                                        namaSurah:
+                                            'Surah ${surahBookmark?[index]["surahName"]}',
+                                        descSurah:
+                                            'Surah ini terdiri atas ${surahBookmark?[index]["totalAyat"]} ayat.',
+                                        tooltip:
+                                            'Hapus surah dari daftar simpan',
+                                        onTap: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      DetailSurahScreen(
+                                                          suraId:
+                                                              surahBookmark![
+                                                                      index]
+                                                                  ["suraId"],
+                                                          surahName:
+                                                              surahBookmark?[
+                                                                      index]
+                                                                  ["surahName"],
+                                                          totalAyat:
+                                                              surahBookmark?[
+                                                                      index][
+                                                                  "totalAyat"])));
+                                        },
+                                        onPressBtnIcon: () async {
+                                          await _deleteData(
+                                              surahBookmark?[index]["id"]);
+                                          setState(() {
+                                            _getData();
+                                          });
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                                  Styles.snackBarRemBookmark);
+                                        },
+                                      );
+                                    })),
                   ]))),
     );
   }

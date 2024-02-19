@@ -1,4 +1,4 @@
-name: juzamma
+name: tahfidzmiplus
 description: Juz Amma apps for MI PLUS Rembang
 publish_to: 'none'
 version: 0.1.0
@@ -7,12 +7,14 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
-  audioplayers: ^5.2.1
   flutter_svg: ^2.0.7
   flutter:
     sdk: flutter
+  intl: ^0.18.1
   sqflite: ^2.3.2
   shimmer: ^3.0.0
+  just_audio: ^0.9.36 
+  
 
 dev_dependencies:
   flutter_test:
@@ -22,7 +24,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
   fonts:
     - family: Lato
       fonts:
@@ -30,4 +31,46 @@ flutter:
         - asset: assets/fonts/Lato-Light.ttf
         - asset: assets/fonts/Lato-Regular.ttf
   assets:
+    - assets/images/
     - assets/juzamma.db
+    - assets/ayat/1/
+    - assets/ayat/78/
+    - assets/ayat/79/
+    - assets/ayat/80/
+    - assets/ayat/81/
+    - assets/ayat/82/
+    - assets/ayat/83/
+    - assets/ayat/84/
+    - assets/ayat/85/
+    - assets/ayat/86/
+    - assets/ayat/87/
+    - assets/ayat/88/
+    - assets/ayat/89/
+    - assets/ayat/90/
+    - assets/ayat/91/
+    - assets/ayat/92/
+    - assets/ayat/93/
+    - assets/ayat/94/
+    - assets/ayat/95/
+    - assets/ayat/96/
+    - assets/ayat/97/
+    - assets/ayat/98/
+    - assets/ayat/99/
+    - assets/ayat/100/
+    - assets/ayat/101/
+    - assets/ayat/102/
+    - assets/ayat/103/
+    - assets/ayat/104/
+    - assets/ayat/105/
+    - assets/ayat/106/
+    - assets/ayat/107/
+    - assets/ayat/108/
+    - assets/ayat/109/
+    - assets/ayat/110/
+    - assets/ayat/111/
+    - assets/ayat/112/
+    - assets/ayat/113/
+    - assets/ayat/114/
+
+    
+  

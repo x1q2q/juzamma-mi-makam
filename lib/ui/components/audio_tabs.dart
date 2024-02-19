@@ -8,13 +8,15 @@ class AudioTabs extends StatelessWidget {
   final void Function() nextSurah;
   final void Function() pauseSurah;
   final void Function() stopSurah;
+  final IconData iconPause;
   const AudioTabs(
       {Key? key,
       required this.titleSurah,
       required this.previousSurah,
       required this.nextSurah,
       required this.pauseSurah,
-      required this.stopSurah})
+      required this.stopSurah,
+      required this.iconPause})
       : super(key: key);
 
   @override
@@ -46,7 +48,7 @@ class AudioTabs extends StatelessWidget {
                         iconSize: 25,
                         color: darkgreenv2,
                         onPressed: pauseSurah,
-                        icon: Icon(Icons.pause)),
+                        icon: Icon(iconPause)),
                     IconButton(
                         iconSize: 25,
                         color: greyv1,

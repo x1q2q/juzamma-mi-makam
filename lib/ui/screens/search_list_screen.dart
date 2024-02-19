@@ -3,6 +3,7 @@ import '../components/surah_card.dart';
 import '../components/label_card.dart';
 import '../components/def_appbar.dart';
 import '../components/skeleton.dart';
+import '../components/empty_box.dart';
 import '../../core/ui_helper.dart';
 import '../../core/styles.dart';
 import '../../providers/services/database_services.dart';
@@ -117,65 +118,69 @@ class _SearchListScreenState extends State<SearchListScreen> {
                     verticalSpaceSmall,
                     _isLoading
                         ? Skeleton.shimmerListSurah
-                        : SizedBox(
-                            child: ListView.builder(
-                                itemCount: surahRecent?.length,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemBuilder: (_, index) {
-                                  Map<String, dynamic> resultSearch = {
-                                    "suraId": surahRecent?[index]["suraId"]
-                                        .toString(),
-                                    "surahName": surahRecent?[index]
-                                        ["surahName"],
-                                    "totalAyat": surahRecent?[index]
-                                        ["totalAyat"],
-                                    "tipe": "recent_search"
-                                  };
-                                  return SurahCard(
-                                    bgColor: _isOnSearching
-                                        ? Colors.amber[100]
-                                        : Colors.white,
-                                    index: index + 1,
-                                    icon: _isOnSearching
-                                        ? Icons.arrow_forward_ios
-                                        : Icons.close,
-                                    namaSurah:
-                                        'Surah ${surahRecent?[index]["surahName"]}',
-                                    descSurah:
-                                        'Surah ini terdiri atas ${surahRecent?[index]["totalAyat"]} ayat.',
-                                    tooltip:
-                                        'Hapus surah dari riwayat pencarian',
-                                    onTap: () async {
-                                      if (_isOnSearching) {
-                                        Surah filteredSurah =
-                                            Surah.fromMap(resultSearch);
-                                        await dbServ
-                                            .addAfterSearch(filteredSurah);
-                                      }
-                                      await _gotoDetail(context, resultSearch);
-                                    },
-                                    onPressBtnIcon: () async {
-                                      if (_isOnSearching) {
-                                        Surah filteredSurah =
-                                            Surah.fromMap(resultSearch);
-                                        await dbServ
-                                            .addAfterSearch(filteredSurah);
-                                        await _gotoDetail(
-                                            context, resultSearch);
-                                      } else {
-                                        await _deleteData(
-                                            surahRecent?[index]["id"]);
-                                        setState(() {
-                                          _getData();
-                                        });
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                                Styles.snackBarRemRecentS);
-                                      }
-                                    },
-                                  );
-                                })),
+                        : surahRecent!.isEmpty
+                            ? const EmptyBox()
+                            : SizedBox(
+                                child: ListView.builder(
+                                    itemCount: surahRecent?.length,
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemBuilder: (_, index) {
+                                      Map<String, dynamic> resultSearch = {
+                                        "suraId": surahRecent?[index]["suraId"]
+                                            .toString(),
+                                        "surahName": surahRecent?[index]
+                                            ["surahName"],
+                                        "totalAyat": surahRecent?[index]
+                                            ["totalAyat"],
+                                        "tipe": "recent_search"
+                                      };
+                                      return SurahCard(
+                                        bgColor: _isOnSearching
+                                            ? Colors.amber[100]
+                                            : Colors.white,
+                                        index: index + 1,
+                                        icon: _isOnSearching
+                                            ? Icons.arrow_forward_ios
+                                            : Icons.close,
+                                        namaSurah:
+                                            'Surah ${surahRecent?[index]["surahName"]}',
+                                        descSurah:
+                                            'Surah ini terdiri atas ${surahRecent?[index]["totalAyat"]} ayat.',
+                                        tooltip:
+                                            'Hapus surah dari riwayat pencarian',
+                                        onTap: () async {
+                                          if (_isOnSearching) {
+                                            Surah filteredSurah =
+                                                Surah.fromMap(resultSearch);
+                                            await dbServ
+                                                .addAfterSearch(filteredSurah);
+                                          }
+                                          await _gotoDetail(
+                                              context, resultSearch);
+                                        },
+                                        onPressBtnIcon: () async {
+                                          if (_isOnSearching) {
+                                            Surah filteredSurah =
+                                                Surah.fromMap(resultSearch);
+                                            await dbServ
+                                                .addAfterSearch(filteredSurah);
+                                            await _gotoDetail(
+                                                context, resultSearch);
+                                          } else {
+                                            await _deleteData(
+                                                surahRecent?[index]["id"]);
+                                            setState(() {
+                                              _getData();
+                                            });
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                                    Styles.snackBarRemRecentS);
+                                          }
+                                        },
+                                      );
+                                    })),
                   ]))),
     ));
   }

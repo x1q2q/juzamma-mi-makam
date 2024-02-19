@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:juzamma/core/ui_helper.dart';
+import 'core/ui_helper.dart';
+import 'ui/screens/search_list_screen.dart';
+import 'ui/screens/splash_screen.dart';
 import 'ui/screens/tab_screen.dart';
 import 'ui/screens/home_screen.dart';
 import 'ui/screens/bookmark_list_screen.dart';
@@ -23,12 +25,14 @@ class MainApp extends StatelessWidget {
           secondary: darkgreenv2,
         ),
       ),
-      home: TabScreen(),
+      home: SplashScreen(),
       debugShowCheckedModeBanner: false,
       routes: {
+        '/tab-screen': (context) => const TabScreen(),
         '/home-screen': (context) => const HomeScreen(),
         '/bookmark-list-screen': (context) => const BookmarkListScreen(),
         '/surah-list-screen': (context) => const SurahListScreen(),
+        '/search-list-screen': (context) => const SearchListScreen()
       },
     );
   }

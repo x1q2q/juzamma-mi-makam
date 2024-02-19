@@ -4,7 +4,7 @@ import '../components/svg.dart';
 import 'home_screen.dart';
 import 'bookmark_list_screen.dart';
 import 'surah_list_screen.dart';
-import '../components/audio_tabs.dart';
+import 'dart:async';
 
 class TabScreen extends StatefulWidget {
   const TabScreen({super.key});
@@ -16,6 +16,11 @@ class TabScreen extends StatefulWidget {
 class _TabScreenState extends State<TabScreen> {
   int _selectedIndex = 0;
   bool _isVisibleAudioTabs = true;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   void _onItemTapped(int index) {
     setState(() {

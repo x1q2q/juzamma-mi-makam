@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import '../../core/styles.dart';
 import '../../core/ui_helper.dart';
@@ -11,17 +9,19 @@ import '../components/ayat_card.dart';
 import '../components/audio_tabs.dart';
 import '../../providers/services/database_services.dart';
 import '../../providers/models/surah.dart';
+import 'package:just_audio/just_audio.dart';
 
 class DetailSurahScreen extends StatefulWidget {
   final int suraId;
   final String? surahName;
   final String? totalAyat;
-  const DetailSurahScreen({
-    super.key,
-    required this.suraId,
-    this.surahName,
-    this.totalAyat,
-  });
+  final bool autoPlay;
+  const DetailSurahScreen(
+      {super.key,
+      required this.suraId,
+      this.surahName,
+      this.totalAyat,
+      this.autoPlay = false});
 
   @override
   State<DetailSurahScreen> createState() => _DetailSurahScreenState();
@@ -37,16 +37,24 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
 
   bool _isLoading = true;
   bool _isError = false;
+  String ayatOnPlay = "0";
+  bool onPause = false;
+  bool onPlaySequence = false;
+  final player = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
     _getData();
+    if (widget.autoPlay) {
+      playSequence(widget.suraId.toString());
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
+    player.dispose();
   }
 
   List? allAyat;
@@ -59,12 +67,119 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
         widget.suraId.toString(), 'tipe', 'favorit');
     allAyat = await dbServ.queryDetail(
         'quran_id', "suraId", widget.suraId.toString());
-
     setState(() {
       _isLoading = false;
       _isBookmarkedSurah = _isStoredBookmark;
       _isFavoriteSurah = _isStoredFavorit;
     });
+  }
+
+  endAyat() async {
+    player.playerStateStream.listen((playerState) {
+      if (playerState.processingState == ProcessingState.completed &&
+          int.parse(widget.totalAyat!) == int.parse(ayatOnPlay)) {
+        setState(() {
+          _isVisibleAudioTabs = false;
+          ayatOnPlay = "0";
+        });
+      }
+    });
+  }
+
+  playAudio(String? folder, String? file) async {
+    await addToRecentplay();
+    await player.setAsset("assets/ayat/$folder/$file.mp3");
+    setState(() {
+      ayatOnPlay = file!;
+      _isVisibleAudioTabs = true;
+      onPlaySequence = false;
+    });
+    await player.play();
+    await endAyat();
+  }
+
+  playSequence(String? folder) async {
+    setState(() {
+      _isVisibleAudioTabs = true;
+      onPlaySequence = true;
+    });
+    await addToRecentplay();
+    int total = int.parse(widget.totalAyat!);
+    var audios = <AudioSource>[];
+    var list = [for (var i = 0; i <= total; i++) i];
+
+    list.forEach((i) {
+      return audios.add(AudioSource.asset("assets/ayat/$folder/$i.mp3"));
+    });
+    final playlist = ConcatenatingAudioSource(
+      useLazyPreparation: true,
+      shuffleOrder: DefaultShuffleOrder(),
+      children: audios,
+    );
+    await player.setAudioSource(playlist,
+        initialIndex: 0, initialPosition: Duration.zero);
+    await player.play();
+
+    if (player.currentIndex == int.parse(widget.totalAyat!)) {
+      setState(() {
+        _isVisibleAudioTabs = false;
+        ayatOnPlay = "0";
+      });
+    }
+  }
+
+  nextAudio(String? folder, String? newFile) async {
+    await player.setAsset("assets/ayat/$folder/$newFile.mp3");
+    setState(() {
+      ayatOnPlay = newFile.toString();
+      _isVisibleAudioTabs = true;
+    });
+    await player.play();
+    await endAyat();
+  }
+
+  prevAudio(String? folder, String? newFile) async {
+    await player.setAsset("assets/ayat/$folder/$newFile.mp3");
+    setState(() {
+      ayatOnPlay = newFile.toString();
+      _isVisibleAudioTabs = true;
+    });
+    await player.play();
+    await endAyat();
+  }
+
+  pauseAudio() async {
+    player.pause();
+    setState(() {
+      onPause = true;
+    });
+  }
+
+  resumeAudio() async {
+    player.play();
+    setState(() {
+      onPause = false;
+    });
+  }
+
+  stopAudio() async {
+    await player.stop();
+    setState(() {
+      _isVisibleAudioTabs = false;
+      ayatOnPlay = "0";
+      onPlaySequence = false;
+    });
+  }
+
+  addToRecentplay() async {
+    Map<String, dynamic> dt = {
+      "suraId": widget.suraId.toString(),
+      "surahName": widget.surahName,
+      "totalAyat": widget.totalAyat,
+      "tipe": "recent_play"
+    };
+    Surah surahData = Surah.fromMap(dt);
+    await dbServ.addToRecent(surahData);
   }
 
   @override
@@ -104,6 +219,7 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
                         List lastFac = await dbServ.queryDetail(
                             'temporary_surah', 'tipe', 'favorit');
                         if (lastFac.length > 2) {
+                          //replace the newes favorit
                           await dbServ.removeBySuraId(
                               lastFac[0]["suraId"].toString(), 'favorit');
                         }
@@ -179,25 +295,27 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
                                     : Icons.play_arrow,
                                 color: Colors.white,
                               ),
-                              onTap: () => {
-                                setState(() {
-                                  _isVisibleAudioTabs = !_isVisibleAudioTabs;
-                                })
+                              onTap: () async {
+                                if (!_isVisibleAudioTabs) {
+                                  await playSequence(widget.suraId.toString());
+                                } else {
+                                  await stopAudio();
+                                }
                               },
                             ),
                           ],
                         )),
-                    widget.suraId != '1'
-                        ? Container(
-                            width: double.infinity,
-                            color: greyv1,
-                            padding: EdgeInsets.all(15),
-                            child: Center(
-                                child: Text(
-                                    'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ',
-                                    style: Styles.wLarge23)),
-                          )
-                        : Center(),
+                    Container(
+                      width: double.infinity,
+                      color: greyv1,
+                      padding: EdgeInsets.all(15),
+                      child: Center(
+                          child: Text(
+                              widget.suraId != 1
+                                  ? 'بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ'
+                                  : 'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ',
+                              style: Styles.wLarge23)),
+                    ),
                     _isLoading
                         ? Column(
                             children: <Widget>[
@@ -218,8 +336,9 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
                                     ayatTeks: allAyat?[index]["ayahText"],
                                     ayatLatinTeks: allAyat?[index]["readText"],
                                     ayatTerjemahan: allAyat?[index]["indoText"],
-                                    onLongpressed: () {
-                                      print(allAyat?[index]["readText"]);
+                                    onLongpressed: () async {
+                                      await playAudio(widget.suraId.toString(),
+                                          "${index + 1}");
                                     },
                                     ayatke: index + 1,
                                   );
@@ -234,10 +353,43 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
               curve: Curves.fastOutSlowIn,
               opacity: _isVisibleAudioTabs ? 1 : 0,
               child: AudioTabs(
-                  titleSurah: "Surah Al-Insyiroh (1/34)",
-                  previousSurah: () {},
-                  pauseSurah: () {},
-                  nextSurah: () {},
+                  iconPause: onPause ? Icons.play_arrow : Icons.pause,
+                  titleSurah: onPlaySequence
+                      ? "Surah ${widget.surahName}"
+                      : "Surah ${widget.surahName} ($ayatOnPlay/${widget.totalAyat})",
+                  previousSurah: () async {
+                    if (onPlaySequence) {
+                      await player.seekToPrevious();
+                    } else {
+                      int newFile = int.parse(ayatOnPlay) - 1;
+                      if (newFile >= 0) {
+                        await prevAudio(
+                            widget.suraId.toString(), newFile.toString());
+                      } else {
+                        null;
+                      }
+                    }
+                  },
+                  pauseSurah: () async {
+                    if (onPause) {
+                      await resumeAudio();
+                    } else {
+                      await pauseAudio();
+                    }
+                  },
+                  nextSurah: () async {
+                    if (onPlaySequence) {
+                      await player.seekToNext();
+                    } else {
+                      int newFile = int.parse(ayatOnPlay) + 1;
+                      if (newFile <= int.parse(widget.totalAyat!)) {
+                        await nextAudio(
+                            widget.suraId.toString(), newFile.toString());
+                      } else {
+                        null;
+                      }
+                    }
+                  },
                   stopSurah: () {}),
             ),
           )),

@@ -38,6 +38,7 @@ class DatabaseService {
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(
         'CREATE TABLE temporary_surah (id INTEGER PRIMARY KEY AUTOINCREMENT, suraId INTEGER, tipe TEXT, surahName TEXT, totalAyat TEXT)');
+        
     // tipe  {'bookmark','favorit','recent_search','recent_play'}
   }
 
@@ -62,7 +63,7 @@ class DatabaseService {
   Future<List> queryDetail(String table, String? column, String? value) async {
     Database db = await database;
     return await db.rawQuery(
-        'SELECT * FROM "$table" WHERE ${column}="$value" ORDER BY id desc');
+        'SELECT * FROM "$table" WHERE ${column}="$value" ORDER BY id asc');
   }
 
   Future<List> queryDetailAnd(String table, String? column1, String? value1,
@@ -96,6 +97,17 @@ class DatabaseService {
     checkQ = await queryDetailAnd(
         'temporary_surah', 'suraId', surah!.suraId, 'tipe', 'recent_search');
     if (checkQ.isEmpty) {
+      await addTemp(surah);
+    }
+  }
+
+  Future<void> addToRecent(Surah? surah) async {
+    List checkQ;
+    checkQ = await queryDetail('temporary_surah', 'tipe', 'recent_play');
+    if (checkQ.isEmpty) {
+      await addTemp(surah);
+    } else {
+      await removeTemp(checkQ[0]["id"]);
       await addTemp(surah);
     }
   }
