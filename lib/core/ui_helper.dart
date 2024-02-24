@@ -11,6 +11,7 @@ const Color greyv1 = Color.fromARGB(255, 117, 117, 117);
 const Color greyv2 = Color.fromARGB(255, 89, 89, 89);
 
 const Color redv1 = Color.fromARGB(255, 244, 144, 150);
+const Color amberv1 = Color.fromARGB(255, 255, 246, 126);
 
 const Widget verticalSpaceXSmall = SizedBox(height: 5.0);
 const Widget verticalSpaceSmall = SizedBox(height: 15.0);

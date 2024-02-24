@@ -9,6 +9,7 @@ class AyatCard extends StatelessWidget {
   final String ayatTerjemahan;
   final int ayatke;
   final void Function()? onLongpressed;
+  final String? onIdPlay;
 
   const AyatCard(
       {Key? key,
@@ -16,7 +17,8 @@ class AyatCard extends StatelessWidget {
       required this.ayatTeks,
       required this.ayatLatinTeks,
       required this.ayatTerjemahan,
-      required this.onLongpressed})
+      required this.onLongpressed,
+      this.onIdPlay})
       : super(key: key);
 
   @override
@@ -28,7 +30,7 @@ class AyatCard extends StatelessWidget {
             child: InkWell(
                 splashColor: lightgreenv2,
                 highlightColor: Colors.amberAccent[100],
-                onLongPress: onLongpressed,
+                onTap: onLongpressed,
                 child: Container(
                     padding: EdgeInsets.symmetric(vertical: 25, horizontal: 15),
                     child: Column(
@@ -52,18 +54,29 @@ class AyatCard extends StatelessWidget {
                                 Expanded(
                                     child: Text(
                                   ayatTeks,
-                                  style: Styles.gLarge26,
+                                  style: TextStyle(
+                                      fontFamily: 'Lato',
+                                      fontWeight: FontWeight.w600,
+                                      color: darkgreenv1,
+                                      fontSize: 26,
+                                      backgroundColor:
+                                          onIdPlay == ayatke.toString()
+                                              ? amberv1
+                                              : Colors.transparent),
                                   textAlign: TextAlign.right,
                                 ))
                               ]),
                           verticalSpaceSmall,
                           Text(ayatLatinTeks,
-                              style: const TextStyle(
-                                  color: darkgreenv2,
+                              style: TextStyle(
+                                  color: darkgreenv1,
                                   fontSize: 16,
                                   fontStyle: FontStyle.italic,
                                   decoration: TextDecoration.underline,
-                                  decorationColor: darkgreenv2)),
+                                  decorationColor: darkgreenv2,
+                                  backgroundColor: onIdPlay == ayatke.toString()
+                                      ? amberv1
+                                      : Colors.transparent)),
                           verticalSpaceXSmall,
                           Text(
                             ayatTerjemahan,

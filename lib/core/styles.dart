@@ -53,12 +53,6 @@ class Styles {
       color: Colors.white,
       fontSize: 23);
 
-  static const gLarge26 = TextStyle(
-      fontFamily: 'Lato',
-      fontWeight: FontWeight.w600,
-      color: darkgreenv1,
-      fontSize: 26);
-
   static const gLarge25 = TextStyle(
       fontFamily: 'Lato',
       fontWeight: FontWeight.w900,

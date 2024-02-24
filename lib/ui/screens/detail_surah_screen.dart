@@ -36,10 +36,10 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
   bool _isStoredFavorit = false;
 
   bool _isLoading = true;
-  bool _isError = false;
   String ayatOnPlay = "0";
   bool onPause = false;
   bool onPlaySequence = false;
+  bool onEndAyat = false;
   final player = AudioPlayer();
 
   @override
@@ -76,12 +76,17 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
 
   endAyat() async {
     player.playerStateStream.listen((playerState) {
-      if (playerState.processingState == ProcessingState.completed &&
-          int.parse(widget.totalAyat!) == int.parse(ayatOnPlay)) {
-        setState(() {
-          _isVisibleAudioTabs = false;
-          ayatOnPlay = "0";
-        });
+      if (playerState.processingState == ProcessingState.completed) {
+        if (int.parse(widget.totalAyat!) == int.parse(ayatOnPlay)) {
+          setState(() {
+            _isVisibleAudioTabs = false;
+            ayatOnPlay = "0";
+          });
+        } else {
+          setState(() {
+            onEndAyat = true;
+          });
+        }
       }
     });
   }
@@ -93,6 +98,8 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
       ayatOnPlay = file!;
       _isVisibleAudioTabs = true;
       onPlaySequence = false;
+      onPause = false;
+      onEndAyat = false;
     });
     await player.play();
     await endAyat();
@@ -102,6 +109,7 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
     setState(() {
       _isVisibleAudioTabs = true;
       onPlaySequence = true;
+      onEndAyat = false;
     });
     await addToRecentplay();
     int total = int.parse(widget.totalAyat!);
@@ -118,12 +126,12 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
     );
     await player.setAudioSource(playlist,
         initialIndex: 0, initialPosition: Duration.zero);
-    await player.play();
 
+    await player.play();
     if (player.currentIndex == int.parse(widget.totalAyat!)) {
       setState(() {
-        _isVisibleAudioTabs = false;
         ayatOnPlay = "0";
+        onEndAyat = true;
       });
     }
   }
@@ -133,6 +141,7 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
     setState(() {
       ayatOnPlay = newFile.toString();
       _isVisibleAudioTabs = true;
+      onEndAyat = false;
     });
     await player.play();
     await endAyat();
@@ -143,6 +152,7 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
     setState(() {
       ayatOnPlay = newFile.toString();
       _isVisibleAudioTabs = true;
+      onEndAyat = false;
     });
     await player.play();
     await endAyat();
@@ -333,15 +343,18 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 itemBuilder: (_, index) {
                                   return AyatCard(
-                                    ayatTeks: allAyat?[index]["ayahText"],
-                                    ayatLatinTeks: allAyat?[index]["readText"],
-                                    ayatTerjemahan: allAyat?[index]["indoText"],
-                                    onLongpressed: () async {
-                                      await playAudio(widget.suraId.toString(),
-                                          "${index + 1}");
-                                    },
-                                    ayatke: index + 1,
-                                  );
+                                      ayatTeks: allAyat?[index]["ayahText"],
+                                      ayatLatinTeks: allAyat?[index]
+                                          ["readText"],
+                                      ayatTerjemahan: allAyat?[index]
+                                          ["indoText"],
+                                      onLongpressed: () async {
+                                        await playAudio(
+                                            widget.suraId.toString(),
+                                            "${index + 1}");
+                                      },
+                                      ayatke: index + 1,
+                                      onIdPlay: ayatOnPlay);
                                 })),
                   ])),
           bottomNavigationBar: Visibility(
@@ -353,7 +366,11 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
               curve: Curves.fastOutSlowIn,
               opacity: _isVisibleAudioTabs ? 1 : 0,
               child: AudioTabs(
-                  iconPause: onPause ? Icons.play_arrow : Icons.pause,
+                  iconPause: (onPause
+                      ? Icons.play_arrow
+                      : onEndAyat
+                          ? Icons.refresh
+                          : Icons.pause),
                   titleSurah: onPlaySequence
                       ? "Surah ${widget.surahName}"
                       : "Surah ${widget.surahName} ($ayatOnPlay/${widget.totalAyat})",
@@ -373,6 +390,12 @@ class _DetailSurahScreenState extends State<DetailSurahScreen> {
                   pauseSurah: () async {
                     if (onPause) {
                       await resumeAudio();
+                    } else if (onEndAyat) {
+                      if (onPlaySequence) {
+                        await playSequence(widget.suraId.toString());
+                      } else {
+                        await playAudio(widget.suraId.toString(), ayatOnPlay);
+                      }
                     } else {
                       await pauseAudio();
                     }
